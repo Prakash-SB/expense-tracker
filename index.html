@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Expense Tracker (Multi-User)</title>
+
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<!-- jsPDF -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<!-- FullCalendar -->
+<link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.9/index.global.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.9/index.global.min.js"></script>
+
+<style>
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    font-family: 'Poppins', sans-serif;
+    margin: 0;
+    padding: 0;
+    background: #121212;
+    color: #f5f5f5;
+  }
+  header {
+    background: #1f1f1f;
+    color: #f5f5f5;
+    padding: 20px;
+    text-align: center;
+    font-size: 24px;
+    font-weight: 600;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.6);
+  }
+  nav {
+    display: flex;
+    justify-content: center;
+    background: #2a2a2a;
+    padding: 10px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  nav a {
+    color: #f5f5f5;
+    margin: 0 15px;
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.3s ease;
+    cursor: pointer;
+  }
+  nav a:hover { color: #FFD700; }
+  section { padding: 30px 20px; max-width: 1200px; margin: auto; }
+  .hidden { display: none; }
+
+  /* LOGIN SCREEN */
+  #login-screen {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    background: #121212;
+  }
+  #login-box {
+    background: #1f1f1f;
+    padding: 30px;
+    border-radius: 10px;
+    text-align: center;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.7);
+  }
+  #login-box input {
+    padding: 10px;
+    margin: 10px;
+    width: 200px;
+    border-radius: 5px;
+    border: 1px solid #333;
+    background: #2a2a2a;
+    color: white;
+  }
+  #login-box button {
+    padding: 10px 15px;
+    margin: 5px;
+    border: none;
+    border-radius: 5px;
+    background: #4a90e2;
+    color: white;
+    cursor: pointer;
+  }
+  #login-box button:hover { background: #357ABD; }
+
+  /* Balance Box */
+  .balance {
+    text-align: center;
+    background: #1e1e1e;
+    padding: 20px;
+    margin-bottom: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.7);
+    font-size: 18px;
+    font-weight: bold;
+  }
+
+  /* Form */
+  .form-section {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  .form-section input, .form-section select {
+    padding: 10px;
+    flex: 1;
+    min-width: 150px;
+    border-radius: 5px;
+    border: 1px solid #333;
+    background: #2a2a2a;
+    color: #fff;
+  }
+  .form-section button {
+    background: #4a90e2;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+  }
+  .form-section button:hover { background: #357ABD; }
+
+  /* Charts */
+  .charts-wrapper {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: space-between;
+  }
+  .chart-container {
+    background: #1e1e1e;
+    padding: 10px;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.7);
+    flex: 1;
+    min-width: 250px;
+    max-width: 48%;
+    height: 300px;
+  }
+  canvas { max-height: 250px; }
+
+  /* Table */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+    background: #1e1e1e;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.7);
+  }
+  table th, table td {
+    padding: 12px;
+    border-bottom: 1px solid #333;
+    text-align: left;
+  }
+  table th { background: #2a2a2a; }
+  table td button {
+    padding: 5px 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-right: 5px;
+  }
+  .delete-btn { background: #dc3545; color: white; }
+
+  /* Calendar */
+  #calendar-container {
+    max-width: 900px;
+    margin: auto;
+  }
+
+  /* PDF Button */
+  #downloadPDF {
+    background: #28a745;
+    color: white;
+    padding: 10px 15px;
+    border-radius: 5px;
+    border: none;
+    cursor: pointer;
+    margin: 20px auto;
+    display: block;
+  }
+  #downloadPDF:hover { background: #218838; }
+
+  /* Admin Panel */
+  #admin-panel {
+    background: #1e1e1e;
+    padding: 20px;
+    border-radius: 10px;
+    margin: 20px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.7);
+  }
+  #admin-panel h2 { margin-top: 0; }
+</style>
+</head>
+<body>
+
+<!-- LOGIN SCREEN -->
+<div id="login-screen">
+  <div id="login-box">
+    <h2>🔐 Expense Tracker Login</h2>
+    <input type="text" id="username" placeholder="Enter Username"><br>
+    <input type="password" id="password" placeholder="Enter Password"><br>
+    <button onclick="login()">Login</button>
+    <button onclick="signup()">Sign Up</button>
+    <p id="login-message"></p>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div id="app" class="hidden">
+<header>💰 Expense Tracker</header>
+<nav>
+  <a onclick="scrollToSection('dashboard')">Dashboard</a>
+  <a onclick="scrollToSection('transactions')">Transactions</a>
+  <a onclick="scrollToSection('calendar-section')">Calendar</a>
+  <a onclick="changePassword()">🔑 Change Password</a>
+  <a onclick="logout()">🚪 Logout</a>
+</nav>
+
+<!-- Admin Panel (Only for admin) -->
+<div id="admin-panel" class="hidden">
+  <h2>👑 Admin Panel</h2>
+  <table>
+    <thead>
+      <tr><th>User</th><th>Actions</th></tr>
+    </thead>
+    <tbody id="user-list"></tbody>
+  </table>
+</div>
+
+<section id="dashboard">
+  <div class="balance">
+    💳 Balance in Account (Online): ₹<span id="accountBalance">0.00</span> <br>
+    💵 Balance in Purse (Cash): ₹<span id="purseBalance">0.00</span>
+  </div>
+
+  <div class="form-section">
+    <input type="text" id="description" placeholder="Description">
+    <input type="number" id="amount" placeholder="Amount">
+    <input type="date" id="date">
+    <select id="type">
+      <option value="income">Income</option>
+      <option value="expense">Expense</option>
+    </select>
+    <select id="mode">
+      <option value="Cash">Cash</option>
+      <option value="Online">Online</option>
+    </select>
+    <button onclick="addTransaction()">Add</button>
+  </div>
+
+  <div class="charts-wrapper">
+    <div class="chart-container">
+      <canvas id="expenseChart"></canvas>
+    </div>
+    <div class="chart-container">
+      <canvas id="pieChart"></canvas>
+    </div>
+  </div>
+</section>
+
+<section id="transactions">
+  <table id="transactionTable">
+    <thead>
+      <tr>
+        <th>Date</th>
+        <th>Description</th>
+        <th>Amount</th>
+        <th>Type</th>
+        <th>Mode</th>
+        <th>Delete</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+</section>
+
+<section id="calendar-section">
+  <div id="calendar-container">
+    <div id="calendar"></div>
+  </div>
+</section>
+
+<!-- ✅ PDF Button moved to bottom -->
+<button id="downloadPDF" onclick="downloadPDF()">📄 Download PDF Report</button>
+</div>
+
+<script>
+let users = JSON.parse(localStorage.getItem('users')) || {};
+let currentUser = localStorage.getItem('currentUser') || null;
+let barChart, pieChart, calendar;
+
+function saveUsers() {
+  localStorage.setItem('users', JSON.stringify(users));
+}
+
+function scrollToSection(id) {
+  document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
+}
+
+// LOGIN & SIGNUP
+function login() {
+  const username = document.getElementById('username').value.trim();
+  const password = document.getElementById('password').value;
+  const message = document.getElementById('login-message');
+
+  if (!users[username]) {
+    message.textContent = "❌ User not found. Please sign up.";
+    return;
+  }
+  if (users[username].password !== password) {
+    message.textContent = "❌ Incorrect password.";
+    return;
+  }
+
+  currentUser = username;
+  localStorage.setItem('currentUser', currentUser);
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('app').classList.remove('hidden');
+
+  if (currentUser === 'admin') {
+    document.getElementById('admin-panel').classList.remove('hidden');
+    renderAdmin();
+  }
+
+  renderAll();
+}
+
+function signup() {
+  const username = document.getElementById('username').value.trim();
+  const password = document.getElementById('password').value;
+  const message = document.getElementById('login-message');
+
+  if (!username || !password) {
+    message.textContent = "⚠️ Enter username and password.";
+    return;
+  }
+  if (users[username]) {
+    message.textContent = "⚠️ Username already exists. Try login.";
+    return;
+  }
+
+  users[username] = { password, transactions: [] };
+  saveUsers();
+  message.textContent = "✅ Account created. Please login.";
+}
+
+function logout() {
+  localStorage.removeItem('currentUser');
+  location.reload();
+}
+
+// ✅ ADMIN PANEL
+function renderAdmin() {
+  const tbody = document.getElementById('user-list');
+  tbody.innerHTML = '';
+  for (const user in users) {
+    tbody.innerHTML += `
+      <tr>
+        <td>${user}</td>
+        <td>
+          <button onclick="resetPassword('${user}')">🔑 Reset Password</button>
+          <button onclick="deleteUser('${user}')">🗑 Delete</button>
+        </td>
+      </tr>`;
+  }
+}
+
+function resetPassword(user) {
+  const newPass = prompt("Enter new password for " + user);
+  if (newPass) {
+    users[user].password = newPass;
+    saveUsers();
+    alert("✅ Password reset for " + user);
+  }
+}
+
+function deleteUser(user) {
+  if (confirm("Delete user " + user + "?")) {
+    delete users[user];
+    saveUsers();
+    renderAdmin();
+    if (user === currentUser) logout();
+  }
+}
+
+// ✅ PASSWORD CHANGE
+function changePassword() {
+  const oldPass = prompt("Enter current password:");
+  if (oldPass !== users[currentUser].password) {
+    alert("❌ Wrong password!");
+    return;
+  }
+  const newPass = prompt("Enter new password:");
+  if (newPass) {
+    users[currentUser].password = newPass;
+    saveUsers();
+    alert("✅ Password updated!");
+  }
+}
+
+// CORE FUNCTIONS
+function getTransactions() {
+  return users[currentUser]?.transactions || [];
+}
+function setTransactions(arr) {
+  users[currentUser].transactions = arr;
+  saveUsers();
+}
+
+// ✅ ADD TRANSACTION ONLY
+function addTransaction() {
+  const description = document.getElementById('description').value;
+  const amount = parseFloat(document.getElementById('amount').value);
+  const type = document.getElementById('type').value;
+  const mode = document.getElementById('mode').value;
+  const date = document.getElementById('date').value;
+
+  if (!description || isNaN(amount) || !date) {
+    alert("Please enter valid details!");
+    return;
+  }
+
+  const tx = getTransactions();
+  tx.push({ description, amount, type, mode, date });
+  setTransactions(tx);
+  renderAll();
+  clearForm();
+}
+
+function deleteTransaction(index) {
+  if (confirm("Delete this transaction?")) {
+    const tx = getTransactions();
+    tx.splice(index, 1);
+    setTransactions(tx);
+    renderAll();
+  }
+}
+
+function clearForm() {
+  document.getElementById('description').value = '';
+  document.getElementById('amount').value = '';
+  document.getElementById('date').value = '';
+  document.getElementById('type').value = 'income';
+  document.getElementById('mode').value = 'Cash';
+}
+
+// ✅ RENDER FUNCTIONS
+function renderAll() {
+  renderTable();
+  calculateBalances();
+  updateCharts();
+  updateCalendar();
+  if (currentUser === 'admin') renderAdmin();
+}
+
+function renderTable() {
+  const tbody = document.querySelector('#transactionTable tbody');
+  tbody.innerHTML = '';
+  let tx = getTransactions();
+  tx = tx.sort((a,b)=> new Date(b.date) - new Date(a.date));
+
+  tx.forEach((t, index) => {
+    tbody.innerHTML += `
+      <tr>
+        <td>${t.date}</td>
+        <td>${t.description}</td>
+        <td>₹${t.amount.toFixed(2)}</td>
+        <td style="color:${t.type==='income'?'#28a745':'#dc3545'};">${t.type}</td>
+        <td>${t.mode}</td>
+        <td><button class="delete-btn" onclick="deleteTransaction(${index})">🗑 Delete</button></td>
+      </tr>`;
+  });
+}
+
+function calculateBalances() {
+  let tx = getTransactions();
+  let online = 0, cash = 0;
+  tx.forEach(t => {
+    if (t.mode === 'Online') online += (t.type === 'income' ? t.amount : -t.amount);
+    else cash += (t.type === 'income' ? t.amount : -t.amount);
+  });
+  document.getElementById('accountBalance').textContent = online.toFixed(2);
+  document.getElementById('purseBalance').textContent = cash.toFixed(2);
+}
+
+function updateCharts() {
+  const tx = getTransactions();
+  const weekDays = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+  const incomeData = Array(7).fill(0);
+  const expenseData = Array(7).fill(0);
+
+  tx.forEach(t=>{
+    const d = new Date(t.date);
+    const i = d.getDay();
+    if (t.type==='income') incomeData[i]+=t.amount;
+    else expenseData[i]+=t.amount;
+  });
+
+  if (barChart) barChart.destroy();
+  if (pieChart) pieChart.destroy();
+
+  barChart = new Chart(document.getElementById('expenseChart'), {
+    type:'bar',
+    data:{
+      labels:weekDays,
+      datasets:[
+        {label:'Income',data:incomeData,backgroundColor:'#28a745'},
+        {label:'Expense',data:expenseData,backgroundColor:'#dc3545'}
+      ]
+    },
+    options:{responsive:true}
+  });
+
+  pieChart = new Chart(document.getElementById('pieChart'), {
+    type:'pie',
+    data:{
+      labels:['Income','Expense'],
+      datasets:[{data:[incomeData.reduce((a,b)=>a+b,0),expenseData.reduce((a,b)=>a+b,0)],backgroundColor:['#28a745','#dc3545']}]
+    }
+  });
+}
+
+function updateCalendar() {
+  if (calendar) calendar.destroy();
+  const tx = getTransactions();
+  const events = tx.map(t=>({
+    title:`${t.type==='income'?'+':'-'}₹${t.amount} (${t.description})`,
+    start:t.date,
+    color:t.type==='income'?'#28a745':'#dc3545'
+  }));
+  calendar = new FullCalendar.Calendar(document.getElementById('calendar'), {
+    initialView:'dayGridMonth',
+    events
+  });
+  calendar.render();
+}
+
+// ✅ PDF DOWNLOAD
+async function downloadPDF() {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+  doc.setFontSize(16);
+  doc.text("💰 Expense Tracker Report", 20, 20);
+
+  const tx = getTransactions();
+  let y=40;
+  tx.forEach((t,i)=>{
+    doc.setFontSize(12);
+    doc.text(`${i+1}. ${t.date} | ${t.description} | ₹${t.amount} | ${t.type} | ${t.mode}`,20,y);
+    y+=8;
+    if(y>270){doc.addPage(); y=20;}
+  });
+
+  let online=0,cash=0;
+  tx.forEach(t=>{
+    if(t.mode==='Online') online+=(t.type==='income'?t.amount:-t.amount);
+    else cash+=(t.type==='income'?t.amount:-t.amount);
+  });
+  y+=10;
+  doc.setFontSize(14);
+  doc.text(`💳 Account Balance (Online): ₹${online.toFixed(2)}`,20,y);
+  y+=10;
+  doc.text(`💵 Purse Balance (Cash): ₹${cash.toFixed(2)}`,20,y);
+  doc.save('Expense_Tracker_Report.pdf');
+}
+
+// AUTO LOGIN
+if(currentUser){
+  document.getElementById('login-screen').style.display='none';
+  document.getElementById('app').classList.remove('hidden');
+  if(currentUser==='admin') document.getElementById('admin-panel').classList.remove('hidden');
+  renderAll();
+}
+</script>
+
+</body>
+</html>
