@@ -44,16 +44,21 @@
     position: sticky;
     top: 0;
     z-index: 100;
+    flex-wrap: wrap;
   }
   nav a {
     color: #f5f5f5;
-    margin: 0 15px;
+    margin: 5px 10px;
     text-decoration: none;
     font-weight: 500;
-    transition: color 0.3s ease;
+    padding: 8px 12px;
+    background: #333;
+    border-radius: 6px;
+    transition: color 0.3s ease, background 0.3s ease;
     cursor: pointer;
   }
-  nav a:hover { color: #FFD700; }
+  nav a:hover { color: #FFD700; background: #444; }
+
   section { padding: 30px 20px; max-width: 1200px; margin: auto; }
   .hidden { display: none; }
 
@@ -76,17 +81,17 @@
   #login-box input {
     padding: 10px;
     margin: 10px;
-    width: 200px;
+    width: 220px;
     border-radius: 5px;
     border: 1px solid #333;
     background: #2a2a2a;
     color: white;
   }
   #login-box button {
-    padding: 10px 15px;
+    padding: 12px 18px;
     margin: 5px;
-    min-height: 44px; /* Apple’s recommended touch size */
-  font-size: 16px;
+    min-height: 44px;
+    font-size: 16px;
     border: none;
     border-radius: 5px;
     background: #4a90e2;
@@ -115,21 +120,22 @@
     margin-bottom: 20px;
   }
   .form-section input, .form-section select {
-    padding: 10px;
+    padding: 12px;
     flex: 1;
     min-width: 150px;
     border-radius: 5px;
     border: 1px solid #333;
     background: #2a2a2a;
     color: #fff;
+    font-size: 16px;
   }
   .form-section button {
     background: #4a90e2;
     color: white;
-    min-height: 44px; /* Apple’s recommended touch size */
-  font-size: 16px;
+    min-height: 44px;
+    font-size: 16px;
     border: none;
-    padding: 10px 15px;
+    padding: 12px 15px;
     border-radius: 5px;
     cursor: pointer;
     transition: background 0.3s ease;
@@ -174,8 +180,8 @@
   table td button {
     padding: 5px 10px;
     border: none;
-    min-height: 44px; /* Apple’s recommended touch size */
-  font-size: 16px;
+    min-height: 44px;
+    font-size: 16px;
     border-radius: 5px;
     cursor: pointer;
     margin-right: 5px;
@@ -192,12 +198,14 @@
   #downloadPDF {
     background: #28a745;
     color: white;
-    padding: 10px 15px;
+    padding: 12px 15px;
     border-radius: 5px;
     border: none;
     cursor: pointer;
     margin: 20px auto;
     display: block;
+    font-size: 16px;
+    min-height: 44px;
   }
   #downloadPDF:hover { background: #218838; }
 
@@ -210,36 +218,43 @@
     box-shadow: 0 2px 10px rgba(0,0,0,0.7);
   }
   #admin-panel h2 { margin-top: 0; }
-  @media (max-width: 768px) {
-  nav {
-    flex-wrap: wrap;
-    font-size: 14px;
-  }
-  .form-section {
-    flex-direction: column;
-  }
-  .charts-wrapper {
-    flex-direction: column;
-  }
-  .chart-container {
-    max-width: 100%;
-  }
-  table, thead, tbody, th, td, tr {
-    display: block;
-    width: 100%;
-  }
-  table tr {
-    margin-bottom: 15px;
-    background: #1e1e1e;
-    border-radius: 10px;
-    padding: 10px;
-  }
-  table td {
-    border-bottom: none;
-    padding: 8px 5px;
-  }
-}
 
+  /* 📱 MOBILE STYLING */
+  @media (max-width: 768px) {
+    nav { flex-direction: row; }
+    nav a { flex: 1; text-align: center; }
+
+    /* Stack form inputs */
+    .form-section { flex-direction: column; }
+    .form-section input, .form-section select, .form-section button { width: 100%; }
+
+    /* Stack charts */
+    .charts-wrapper { flex-direction: column; }
+    .chart-container { max-width: 100%; height: 260px; }
+
+    /* Make table into cards */
+    table, thead, tbody, th, td, tr { display: block; width: 100%; }
+    thead { display: none; }
+    tr {
+      background: #1e1e1e;
+      margin-bottom: 12px;
+      padding: 12px;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+    }
+    td {
+      padding: 6px;
+      border: none;
+      display: flex;
+      justify-content: space-between;
+      font-size: 15px;
+    }
+    td::before {
+      content: attr(data-label);
+      font-weight: bold;
+      color: #FFD700;
+    }
+  }
 </style>
 </head>
 <body>
@@ -267,13 +282,11 @@
   <a onclick="logout()">🚪 Logout</a>
 </nav>
 
-<!-- Admin Panel (Only for admin) -->
+<!-- Admin Panel -->
 <div id="admin-panel" class="hidden">
   <h2>👑 Admin Panel</h2>
   <table>
-    <thead>
-      <tr><th>User</th><th>Actions</th></tr>
-    </thead>
+    <thead><tr><th>User</th><th>Actions</th></tr></thead>
     <tbody id="user-list"></tbody>
   </table>
 </div>
@@ -300,12 +313,8 @@
   </div>
 
   <div class="charts-wrapper">
-    <div class="chart-container">
-      <canvas id="expenseChart"></canvas>
-    </div>
-    <div class="chart-container">
-      <canvas id="pieChart"></canvas>
-    </div>
+    <div class="chart-container"><canvas id="expenseChart"></canvas></div>
+    <div class="chart-container"><canvas id="pieChart"></canvas></div>
   </div>
 </section>
 
@@ -331,7 +340,6 @@
   </div>
 </section>
 
-<!-- ✅ PDF Button moved to bottom -->
 <button id="downloadPDF" onclick="downloadPDF()">📄 Download PDF Report</button>
 </div>
 
@@ -434,7 +442,6 @@ function deleteUser(user) {
   }
 }
 
-// ✅ PASSWORD CHANGE
 function changePassword() {
   const oldPass = prompt("Enter current password:");
   if (oldPass !== users[currentUser].password) {
@@ -458,7 +465,6 @@ function setTransactions(arr) {
   saveUsers();
 }
 
-// ✅ ADD TRANSACTION ONLY
 function addTransaction() {
   const description = document.getElementById('description').value;
   const amount = parseFloat(document.getElementById('amount').value);
@@ -513,12 +519,12 @@ function renderTable() {
   tx.forEach((t, index) => {
     tbody.innerHTML += `
       <tr>
-        <td>${t.date}</td>
-        <td>${t.description}</td>
-        <td>₹${t.amount.toFixed(2)}</td>
-        <td style="color:${t.type==='income'?'#28a745':'#dc3545'};">${t.type}</td>
-        <td>${t.mode}</td>
-        <td><button class="delete-btn" onclick="deleteTransaction(${index})">🗑 Delete</button></td>
+        <td data-label="Date">${t.date}</td>
+        <td data-label="Description">${t.description}</td>
+        <td data-label="Amount">₹${t.amount.toFixed(2)}</td>
+        <td data-label="Type" style="color:${t.type==='income'?'#28a745':'#dc3545'};">${t.type}</td>
+        <td data-label="Mode">${t.mode}</td>
+        <td data-label="Delete"><button class="delete-btn" onclick="deleteTransaction(${index})">🗑 Delete</button></td>
       </tr>`;
   });
 }
