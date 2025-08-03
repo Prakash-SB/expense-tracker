@@ -2,6 +2,9 @@
 <html lang="en">
   <header>💰 Expense Tracker
   <button class="toggle-theme" onclick="toggleTheme()">🌗</button>
+  <!-- ✅ Hamburger Menu Button -->
+<div id="hamburger" onclick="toggleMenu()">☰</div>
+
 </header>
 <head>
 <meta charset="UTF-8">
@@ -222,6 +225,48 @@
     box-shadow: 0 2px 10px rgba(0,0,0,0.7);
   }
   #admin-panel h2 { margin-top: 0; }
+  /* ✅ Hamburger Menu Button */
+#hamburger {
+  display: none;
+  font-size: 28px;
+  cursor: pointer;
+  padding: 10px 15px;
+  color: #f5f5f5;
+  position: absolute;
+  left: 10px;
+  top: 15px;
+  background: #333;
+  border-radius: 6px;
+}
+
+/* ✅ Mobile Menu Styling */
+@media (max-width: 768px) {
+  #hamburger {
+    display: block;
+  }
+  nav {
+    display: none;
+    flex-direction: column;
+    background: #2a2a2a;
+    position: absolute;
+    top: 60px;
+    left: 0;
+    width: 100%;
+    padding: 10px 0;
+    z-index: 100;
+  }
+  nav.show {
+    display: flex;
+  }
+  nav a {
+    width: 100%;
+    text-align: center;
+    padding: 12px;
+    border-bottom: 1px solid #444;
+    font-size: 18px;
+  }
+}
+
 
   /* 📱 MOBILE STYLING */
   /* ✅ Mobile-friendly table */
@@ -391,7 +436,7 @@ body.light-mode table {
 <!-- MAIN APP -->
 <div id="app" class="hidden">
 <header>💰 Expense Tracker</header>
-<nav>
+<na id="menu">
   <a onclick="scrollToSection('dashboard')">Dashboard</a>
   <a onclick="scrollToSection('transactions')">Transactions</a>
   <a onclick="scrollToSection('calendar-section')">Calendar</a>
@@ -675,7 +720,7 @@ function updateCharts() {
   const weekDays = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
   const incomeData = Array(7).fill(0);
   const expenseData = Array(7).fill(0);
-  
+
   const today = new Date();
 const currentWeekStart = new Date(today);
 currentWeekStart.setDate(today.getDate() - today.getDay());
@@ -771,6 +816,10 @@ function showToast(message) {
 function toggleTheme() {
   document.body.classList.toggle("light-mode");
 }
+function toggleMenu() {
+  document.getElementById("menu").classList.toggle("show");
+}
+
 
 </script>
     <!-- ✅ Toast Notification -->
