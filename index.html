@@ -2,6 +2,7 @@
 <html lang="en">
   
 <head>
+  <link rel="icon" type="image/svg+xml" href="compressed_054c46e219b98b566cd4cb22af8c348e.svg">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title> "Expense Tracker (Multi-User)"
@@ -23,12 +24,16 @@
     scroll-behavior: smooth;
   }
   body {
-    font-family: 'Poppins', sans-serif;
-    margin: 0;
-    padding: 0;
-    background: #121212;
-    color: #f5f5f5;
-  }
+  font-family: 'Poppins', sans-serif;
+  margin: 0;
+  padding: 0;
+  background: url('./images.svg') no-repeat center center fixed;
+  background-size: cover;
+  color: #f5f5f5;
+  text-align: center;
+  margin-top: 100px;
+}
+
   header {
     background: #1f1f1f;
     color: #f5f5f5;
@@ -38,6 +43,7 @@
     font-weight: 600;
     box-shadow: 0 2px 8px rgba(0,0,0,0.6);
   }
+  
   nav {
     display: flex;
     justify-content: center;
@@ -200,8 +206,8 @@
   #downloadPDF {
     background: #28a745;
     color: white;
-    padding: 12px 15px;
-    border-radius: 5px;
+    padding: 8px 11px;
+    border-radius: 4px;
     border: none;
     cursor: pointer;
     margin: 20px auto;
@@ -333,16 +339,44 @@
   opacity: 1;
   bottom: 100px;
 }
-body.light-mode {
-  background: #f5f5f5;
-  color: #222;
+
+/* 🌙 DARK MODE FULLCALENDAR FIX */
+.fc-theme-standard td, 
+.fc-theme-standard th {
+  border: 1px solid #333 !important; /* Dark borders */
 }
-body.light-mode header,
-body.light-mode nav,
-body.light-mode .balance,
-body.light-mode table {
-  background: #ffffff;
-  color: #000;
+
+.fc .fc-toolbar-title {
+  color: #fff !important; /* Title visible */
+  font-weight: bold;
+}
+
+.fc .fc-daygrid-day-number {
+  color: #fff !important; /* Day numbers visible */
+}
+
+.fc .fc-col-header-cell {
+  background: #222 !important; /* Header background */
+  color: #FFD700 !important; /* Header text (yellow) */
+}
+
+.fc-daygrid-day {
+  background: #1e1e1e !important; /* Day cells dark */
+  color: #fff !important;
+}
+
+.fc .fc-daygrid-day.fc-day-today {
+  background: #333 !important; /* Highlight today's date */
+  color: #FFD700 !important;
+}
+
+.fc-event {
+  background-color: #28a745 !important; /* Income green */
+  border: none !important;
+  color: white !important;
+  font-weight: bold;
+  padding: 2px 4px;
+  border-radius: 4px;
 }
 
 </style>
@@ -364,7 +398,6 @@ body.light-mode table {
     body {
       font-family: 'Poppins', sans-serif;
       text-align: center;
-      background: #f4f4f4;
       margin-top: 100px;
     }
     #clock {
@@ -402,6 +435,7 @@ body.light-mode table {
 
   <script>
     function updateClock() {
+    
       let now = new Date();
 
       // Get date parts
@@ -430,7 +464,10 @@ body.light-mode table {
   </script>
 <!-- MAIN APP -->
 <div id="app" class="hidden">
-<header>💰 Expense Tracker</header>
+<header>
+   <img src="compressed_054c46e219b98b566cd4cb22af8c348e.svg" alt="Expense Tracker Logo" style="height:50px; vertical-align: middle;">
+  <span style="font-size: 24px; font-weight: 600; margin-left: 10px;">Expense Tracker</span>
+</header>
 <nav id="menu">
   <a onclick="scrollToSection('dashboard')">Dashboard</a>
   <a onclick="scrollToSection('transactions')">Transactions</a>
@@ -808,9 +845,7 @@ function showToast(message) {
   toast.className = "toast show";
   setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 2500);
 }
-function toggleTheme() {
-  document.body.classList.toggle("light-mode");
-}
+
 function toggleMenu() {
   document.getElementById("menu").classList.toggle("show");
 }
