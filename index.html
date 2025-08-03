@@ -1,9 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
+  <header>💰 Expense Tracker
+  <button class="toggle-theme" onclick="toggleTheme()">🌗</button>
+</header>
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Expense Tracker (Multi-User)</title>
+<title> "Expense Tracker (Multi-User)"
+</title>
 
 <!-- Google Fonts -->
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
@@ -255,6 +259,41 @@
       color: #FFD700;
     }
   }
+  /* TOAST NOTIFICATION */
+.toast {
+  visibility: hidden;
+  min-width: 200px;
+  background: #4caf50;
+  color: #fff;
+  text-align: center;
+  border-radius: 6px;
+  padding: 12px;
+  position: fixed;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 16px;
+  z-index: 999;
+  opacity: 0;
+  transition: opacity 0.5s, bottom 0.5s;
+}
+.toast.show {
+  visibility: visible;
+  opacity: 1;
+  bottom: 100px;
+}
+body.light-mode {
+  background: #f5f5f5;
+  color: #222;
+}
+body.light-mode header,
+body.light-mode nav,
+body.light-mode .balance,
+body.light-mode table {
+  background: #ffffff;
+  color: #000;
+}
+
 </style>
 </head>
 <body>
@@ -270,7 +309,74 @@
     <p id="login-message"></p>
   </div>
 </div>
+<style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      text-align: center;
+      background: #f4f4f4;
+      margin-top: 100px;
+    }
+    #clock {
+      font-size: 2em;
+      font-weight: bold;
+      color: #333;
+    }
+    .bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  display: flex;
+  background: #1f1f1f;
+  justify-content: space-around;
+  padding: 10px 0;
+  border-top: 1px solid #333;
+}
+.bottom-nav button {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 16px;
+  flex: 1;
+  cursor: pointer;
+}
+.bottom-nav button:hover { color: #FFD700; }
 
+  </style>
+</head>
+<body>
+
+  <h2> Current Date & Time</h2>
+  <div id="clock"></div>
+
+  <script>
+    function updateClock() {
+      let now = new Date();
+
+      // Get date parts
+      let day = String(now.getDate()).padStart(2, '0');
+      let month = String(now.getMonth() + 1).padStart(2, '0'); // Month is 0-indexed
+      let year = now.getFullYear();
+
+      // Get time parts
+      let hours = String(now.getHours()).padStart(2, '0');
+      let minutes = String(now.getMinutes()).padStart(2, '0');
+      let seconds = String(now.getSeconds()).padStart(2, '0');
+
+      // Format date and time
+      let date = `${day}-${month}-${year}`;
+      let time = `${hours}:${minutes}:${seconds}`;
+
+      // Display in #clock div
+      document.getElementById('clock').innerHTML = `${date} | ${time}`;
+    }
+
+    // Update every second
+    setInterval(updateClock, 1000);
+
+    // Call immediately to avoid 1-second delay
+    updateClock();
+  </script>
 <!-- MAIN APP -->
 <div id="app" class="hidden">
 <header>💰 Expense Tracker</header>
@@ -356,7 +462,7 @@ function scrollToSection(id) {
   document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
 }
 
-// LOGIN & SIGNUP
+// ✅ LOGIN & SIGNUP
 function login() {
   const username = document.getElementById('username').value.trim();
   const password = document.getElementById('password').value;
@@ -376,6 +482,7 @@ function login() {
   document.getElementById('login-screen').style.display = 'none';
   document.getElementById('app').classList.remove('hidden');
 
+  // ✅ If ADMIN logs in → show panel & render user list
   if (currentUser === 'admin') {
     document.getElementById('admin-panel').classList.remove('hidden');
     renderAdmin();
@@ -398,8 +505,15 @@ function signup() {
     return;
   }
 
+  // ✅ Add new user
   users[username] = { password, transactions: [] };
   saveUsers();
+
+  // ✅ IF ADMIN IS LOGGED IN → refresh panel live
+  if (currentUser === 'admin') {
+    renderAdmin();
+  }
+
   message.textContent = "✅ Account created. Please login.";
 }
 
@@ -412,6 +526,7 @@ function logout() {
 function renderAdmin() {
   const tbody = document.getElementById('user-list');
   tbody.innerHTML = '';
+
   for (const user in users) {
     tbody.innerHTML += `
       <tr>
@@ -430,6 +545,7 @@ function resetPassword(user) {
     users[user].password = newPass;
     saveUsers();
     alert("✅ Password reset for " + user);
+    renderAdmin(); // ✅ refresh panel
   }
 }
 
@@ -437,11 +553,12 @@ function deleteUser(user) {
   if (confirm("Delete user " + user + "?")) {
     delete users[user];
     saveUsers();
-    renderAdmin();
+    renderAdmin(); // ✅ refresh panel
     if (user === currentUser) logout();
   }
 }
 
+// ✅ PASSWORD CHANGE
 function changePassword() {
   const oldPass = prompt("Enter current password:");
   if (oldPass !== users[currentUser].password) {
@@ -456,7 +573,7 @@ function changePassword() {
   }
 }
 
-// CORE FUNCTIONS
+// ✅ CORE FUNCTIONS
 function getTransactions() {
   return users[currentUser]?.transactions || [];
 }
@@ -482,6 +599,7 @@ function addTransaction() {
   setTransactions(tx);
   renderAll();
   clearForm();
+   showToast("✅ Transaction Added!")
 }
 
 function deleteTransaction(index) {
@@ -490,6 +608,7 @@ function deleteTransaction(index) {
     tx.splice(index, 1);
     setTransactions(tx);
     renderAll();
+    showToast("🗑 Transaction Deleted!");
   }
 }
 
@@ -621,14 +740,34 @@ async function downloadPDF() {
   doc.save('Expense_Tracker_Report.pdf');
 }
 
-// AUTO LOGIN
+// ✅ AUTO LOGIN
 if(currentUser){
   document.getElementById('login-screen').style.display='none';
   document.getElementById('app').classList.remove('hidden');
   if(currentUser==='admin') document.getElementById('admin-panel').classList.remove('hidden');
   renderAll();
 }
+function showToast(message) {
+  let toast = document.getElementById("toast");
+  toast.innerText = message;
+  toast.className = "toast show";
+  setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 2500);
+}
+function toggleTheme() {
+  document.body.classList.toggle("light-mode");
+}
+
 </script>
+    <!-- ✅ Toast Notification -->
+<div id="toast" class="toast">✅ Transaction Added!</div>
+
+<div class="bottom-nav">
+  <button onclick="scrollToSection('dashboard')">🏠 Home</button>
+  <button onclick="scrollToSection('transactions')">📜 Transactions</button>
+  <button onclick="scrollToSection('calendar-section')">📅 Calendar</button>
+  <button onclick="logout()">🚪 Logout</button>
+</div>
+
 
 </body>
 </html>
