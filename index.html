@@ -409,6 +409,11 @@
 .fc-event, .fc-event .fc-event-title {
   color: white !important;
 }
+#dropdownMenu p:hover {
+  background: #444;
+  border-radius: 5px;
+}
+
 
 </style>
 </head>
@@ -561,6 +566,20 @@
 <header>
    <img src="https://raw.githubusercontent.com/Prakash-SB/expense-tracker/9ee4f87e9bd9ba753a314f373209f2bb44e71344/compressed_054c46e219b98b566cd4cb22af8c348e.svg" alt="Expense Tracker Logo" style="height:100px; vertical-align: middle;">
   <span style="font-size: 40px; font-weight: 100;">Expense Tracker</span>
+  <div id="userMenu" style="position: relative; display: inline-block;">
+  <span id="usernameDisplay" 
+        style="font-size: 18px; font-weight: bold; cursor: pointer; color: #FFD700;">
+  </span>
+  <div id="dropdownMenu" 
+       style="display: none; position: absolute; right: 0; background: #2a2a2a; 
+              border-radius: 8px; box-shadow: 0px 4px 10px rgba(0,0,0,0.3); 
+              padding: 10px; min-width: 160px; z-index: 100;">
+    <p onclick="changePassword()" style="margin: 0; padding: 8px; color: #fff; cursor: pointer;">🔐 Change Password</p>
+    <hr style="border: 0; border-top: 1px solid #444; margin: 5px 0;">
+    <p onclick="logout()" style="margin: 0; padding: 8px; color: #ff4d4d; cursor: pointer;">🚪 Logout</p>
+  </div>
+</div>
+
 </header>
 <nav id="menu">
   <a onclick="scrollToSection('dashboard')">Dashboard</a>
@@ -942,7 +961,7 @@ function updateCalendar() {
     start: t.date,
     backgroundColor: t.type==='income' ? '#28a745' : '#dc3545', // Green for income, red for expense
     borderColor: t.type==='income' ? '#28a745' : '#dc3545',    // Border matches background
-    textColor: '#ffffff',                                     // White text
+    textColor: '#<ffffff>',                                     // White text
     display: 'block',                                         // Full display
     classNames: t.type==='income' ? 'income-event' : 'expense-event' // Additional class
   }));
@@ -1146,10 +1165,45 @@ function renderFilteredTable(filteredTx) {
 
  document.addEventListener("DOMContentLoaded", () => {
   const savedUser = localStorage.getItem('currentUser');
+  const usernameDisplay = document.getElementById('usernameDisplay');
+  const dropdownMenu = document.getElementById('dropdownMenu');
+
   if (savedUser) {
-    document.getElementById('usernameDisplay').textContent = `👤 ${savedUser}`;
+    usernameDisplay.textContent = `👤 ${savedUser}`;
   }
+
+  // 👉 Toggle dropdown when username is clicked
+  usernameDisplay.addEventListener('click', () => {
+    dropdownMenu.style.display = dropdownMenu.style.display === 'block' ? 'none' : 'block';
+  });
+
+  // 👉 Hide dropdown if clicked outside
+  document.addEventListener('click', (event) => {
+    if (!event.target.closest('#userMenu')) {
+      dropdownMenu.style.display = 'none';
+    }
+  });
 });
+
+// ✅ Logout function
+function logout() {
+  localStorage.removeItem('currentUser');
+  window.location.reload(); // Or redirect to login page
+}
+
+// ✅ Change Password function
+function changePassword() {
+  const newPassword = prompt("Enter your new password:");
+  if (newPassword) {
+    const currentUser = localStorage.getItem('currentUser');
+    if (currentUser && users[currentUser]) {
+      users[currentUser].password = newPassword;
+      alert("✅ Password updated successfully!");
+      localStorage.setItem('users', JSON.stringify(users)); // save back to localStorage
+    }
+  }
+}
+
 
 </script>
 
