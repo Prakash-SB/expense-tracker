@@ -210,7 +210,7 @@
     border-radius: 4px;
     border: none;
     cursor: pointer;
-    margin: 20px auto;
+    margin: 1px auto 40px auto;
     display: block;
     font-size: 16px;
     min-height: 44px;
@@ -242,6 +242,14 @@
 
 /* ✅ Mobile Menu Styling */
 @media (max-width: 768px) {
+  .filter-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .filter-buttons {
+    grid-column: 1;
+  }
+}
   #hamburger {
     display: block;
   }
@@ -378,6 +386,29 @@
   padding: 2px 4px;
   border-radius: 4px;
 }
+/* Calendar Event Styling */
+.fc-event {
+  opacity: 1 !important;
+  border: none !important;
+  padding: 2px 4px !important;
+}
+
+/* Income events (green) */
+.income-event, .fc-event[style*="background-color: rgb(40, 167, 69)"] {
+  background-color: #28a745 !important;
+  border-color: #28a745 !important;
+}
+
+/* Expense events (red) */
+.expense-event, .fc-event[style*="background-color: rgb(220, 53, 69)"] {
+  background-color: #dc3545 !important;
+  border-color: #dc3545 !important;
+}
+
+/* Ensure text is white */
+.fc-event, .fc-event .fc-event-title {
+  color: white !important;
+}
 
 </style>
 </head>
@@ -401,6 +432,7 @@
       margin-top: 100px;
     }
     #clock {
+      color: white !important;
       font-size: 2em;
       font-weight: bold;
       color: #333;
@@ -425,6 +457,68 @@
   cursor: pointer;
 }
 .bottom-nav button:hover { color: #FFD700; }
+.filter-section {
+  background: #1e1e1e;
+  padding: 15px;
+  border-radius: 10px;
+  margin-bottom: 15px;
+  width: 100%;
+}
+
+.filter-section h3 {
+  margin-top: 0;
+  color: #FFD700;
+}
+
+.filter-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 10px;
+  align-items: end;
+}
+
+.filter-group {
+  margin-bottom: 0;
+}
+
+.filter-group label {
+  display: block;
+  margin-bottom: 5px;
+  color: #f5f5f5;
+}
+
+.filter-group input,
+.filter-group select {
+  width: 100%;
+  padding: 8px;
+  border-radius: 5px;
+  background: #2a2a2a;
+  border: 1px solid #333;
+  color: white;
+}
+
+.filter-buttons {
+  display: flex;
+  gap: 10px;
+  align-self: end;
+}
+
+.filter-buttons button {
+  padding: 8px 15px;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  flex: 1;
+}
+
+#applyFilters {
+  background: #4a90e2;
+}
+
+#resetFilters {
+  background: #6c757d;
+}
 
   </style>
 </head>
@@ -465,8 +559,8 @@
 <!-- MAIN APP -->
 <div id="app" class="hidden">
 <header>
-   <img src="https://raw.githubusercontent.com/Prakash-SB/expense-tracker/9ee4f87e9bd9ba753a314f373209f2bb44e71344/compressed_054c46e219b98b566cd4cb22af8c348e.svg" alt="Expense Tracker Logo" style="height:50px; vertical-align: middle;">
-  <span style="font-size: 24px; font-weight: 600; margin-left: 10px;">Expense Tracker</span>
+   <img src="https://raw.githubusercontent.com/Prakash-SB/expense-tracker/9ee4f87e9bd9ba753a314f373209f2bb44e71344/compressed_054c46e219b98b566cd4cb22af8c348e.svg" alt="Expense Tracker Logo" style="height:100px; vertical-align: middle;">
+  <span style="font-size: 40px; font-weight: 100;">Expense Tracker</span>
 </header>
 <nav id="menu">
   <a onclick="scrollToSection('dashboard')">Dashboard</a>
@@ -505,13 +599,62 @@
     </select>
     <button onclick="addTransaction()">Add</button>
   </div>
+  <div id="usernameDisplay" style="
+    position: absolute; 
+    top: 15px; 
+    right: 20px; 
+    font-weight: bold; 
+    color: #FFD700;
+"></div>
+
 
   <div class="charts-wrapper">
     <div class="chart-container"><canvas id="expenseChart"></canvas></div>
     <div class="chart-container"><canvas id="pieChart"></canvas></div>
   </div>
+  
 </section>
+<div style="max-width: 1000px; margin: auto;">  <!-- ✅ common container -->
 
+  <!-- ✅ FILTER SECTION -->
+  <div class="filter-section" 
+       style="background: #1e1e1e; padding: 15px; border-radius: 10px; margin-bottom: 15px;">
+    <h3 style="margin-top: 0; color: #FFD700;">🔍 Filter Transactions</h3>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; align-items: end;">
+      <div>
+        <label style="display: block; margin-bottom: 5px; color: #f5f5f5;">From Date</label>
+        <input type="date" id="filterFrom" style="width: 100%; padding: 8px; border-radius: 5px; background: #2a2a2a; border: 1px solid #333; color: white;">
+      </div>
+      <div>
+        <label style="display: block; margin-bottom: 5px; color: #f5f5f5;">To Date</label>
+        <input type="date" id="filterTo" style="width: 100%; padding: 8px; border-radius: 5px; background: #2a2a2a; border: 1px solid #333; color: white;">
+      </div>
+      <div>
+        <label style="display: block; margin-bottom: 5px; color: #f5f5f5;">Description</label>
+        <input type="text" id="filterDesc" placeholder="Search..." style="width: 100%; padding: 8px; border-radius: 5px; background: #2a2a2a; border: 1px solid #333; color: white;">
+      </div>
+      <div>
+        <label style="display: block; margin-bottom: 5px; color: #f5f5f5;">Type</label>
+        <select id="filterType" style="width: 100%; padding: 8px; border-radius: 5px; background: #2a2a2a; border: 1px solid #333; color: white;">
+          <option value="">All Types</option>
+          <option value="income">Income</option>
+          <option value="expense">Expense</option>
+        </select>
+      </div>
+      <div>
+        <label style="display: block; margin-bottom: 5px; color: #f5f5f5;">Mode</label>
+        <select id="filterMode" style="width: 100%; padding: 8px; border-radius: 5px; background: #2a2a2a; border: 1px solid #333; color: white;">
+          <option value="">All Modes</option>
+          <option value="Cash">Cash</option>
+          <option value="Online">Online</option>
+        </select>
+      </div>
+      <div style="display: flex; gap: 10px; align-self: end;">
+        <button onclick="applyFilters()" style="padding: 8px 15px; background: #4a90e2; color: white; border: none; border-radius: 5px; cursor: pointer; flex: 1;">Apply</button>
+        <button onclick="resetFilters()" style="padding: 8px 15px; background: #6c757d; color: white; border: none; border-radius: 5px; cursor: pointer; flex: 1;">Reset</button>
+      </div>
+    </div>
+  </div>
 <section id="transactions">
   <table id="transactionTable">
     <thead>
@@ -575,6 +718,7 @@ function login() {
     document.getElementById('admin-panel').classList.remove('hidden');
     renderAdmin();
   }
+  document.getElementById('usernameDisplay').textContent = `👤 ${currentUser}`;
 
   renderAll();
 }
@@ -718,6 +862,7 @@ function renderAll() {
 }
 
 function renderTable() {
+  renderFilteredTable(getTransactions().sort((a,b)=> new Date(b.date) - new Date(a.date)));
   const tbody = document.querySelector('#transactionTable tbody');
   tbody.innerHTML = '';
   let tx = getTransactions();
@@ -791,15 +936,29 @@ currentWeekStart.setDate(today.getDate() - today.getDay());
 function updateCalendar() {
   if (calendar) calendar.destroy();
   const tx = getTransactions();
-  const events = tx.map(t=>({
-    title:`${t.type==='income'?'+':'-'}₹${t.amount} (${t.description})`,
-    start:t.date,
-    color:t.type==='income'?'#28a745':'#dc3545'
+  
+  const events = tx.map(t => ({
+    title: `${t.type==='income'?'+':'-'}₹${t.amount} (${t.description})`,
+    start: t.date,
+    backgroundColor: t.type==='income' ? '#28a745' : '#dc3545', // Green for income, red for expense
+    borderColor: t.type==='income' ? '#28a745' : '#dc3545',    // Border matches background
+    textColor: '#ffffff',                                     // White text
+    display: 'block',                                         // Full display
+    classNames: t.type==='income' ? 'income-event' : 'expense-event' // Additional class
   }));
+  
   calendar = new FullCalendar.Calendar(document.getElementById('calendar'), {
-    initialView:'dayGridMonth',
-    events
+    initialView: 'dayGridMonth',
+    events,
+    eventDisplay: 'block',
+    eventColor: '#378006',
+    eventDidMount: function(info) {
+      // Additional styling when event mounts
+      info.el.style.borderRadius = '4px';
+      info.el.style.fontWeight = 'bold';
+    }
   });
+  
   calendar.render();
 }
 
@@ -807,29 +966,116 @@ function updateCalendar() {
 async function downloadPDF() {
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF();
-  doc.setFontSize(16);
-  doc.text("💰 Expense Tracker Report", 20, 20);
-
-  const tx = getTransactions();
-  let y=40;
-  tx.forEach((t,i)=>{
-    doc.setFontSize(12);
-    doc.text(`${i+1}. ${t.date} | ${t.description} | ₹${t.amount} | ${t.type} | ${t.mode}`,20,y);
-    y+=8;
-    if(y>270){doc.addPage(); y=20;}
+  
+  // Set document properties
+  doc.setProperties({
+    title: 'Expense Tracker Report',
+    subject: 'Financial Report',
+    author: 'Expense Tracker App',
+    keywords: 'expense, income, report',
+    creator: 'Expense Tracker'
   });
 
-  let online=0,cash=0;
-  tx.forEach(t=>{
-    if(t.mode==='Online') online+=(t.type==='income'?t.amount:-t.amount);
-    else cash+=(t.type==='income'?t.amount:-t.amount);
+  // Add header
+  doc.setFontSize(18);
+  doc.setTextColor(40, 167, 69); // Green color
+  doc.text('Expense Tracker Report', 105, 15, { align: 'center' });
+  
+  // Add current date
+  doc.setFontSize(10);
+  doc.setTextColor(100, 100, 100); // Gray color
+  const today = new Date();
+  doc.text(`Generated on: ${today.toLocaleDateString()}`, 105, 22, { align: 'center' });
+
+  // Reset text color
+  doc.setTextColor(0, 0, 0); // Black color
+
+  // Add transactions table
+  const tx = getTransactions().sort((a, b) => new Date(b.date) - new Date(a.date));
+  let y = 35; // Starting Y position
+  
+  // Table header
+  doc.setFontSize(12);
+  doc.setFont(undefined, 'bold');
+  doc.text('Date', 15, y);
+  doc.text('Description', 45, y);
+  doc.text('Amount', 120, y);
+  doc.text('Type', 150, y);
+  doc.text('Mode', 180, y);
+  y += 7;
+
+  // Horizontal line
+  doc.setDrawColor(200, 200, 200);
+  doc.line(15, y, 195, y);
+  y += 10;
+
+  // Table rows
+  doc.setFont(undefined, 'normal');
+  doc.setFontSize(10);
+  
+  tx.forEach((t, index) => {
+    if (y > 270) { // Check if we need a new page
+      doc.addPage();
+      y = 20;
+      // Add header to new page
+      doc.setFontSize(10);
+      doc.text('Expense Tracker Report (continued)', 105, 10, { align: 'center' });
+      y += 15;
+    }
+
+    // Format amount with proper currency symbol
+    const amount = `${t.amount.toFixed(2)}`;
+    
+    // Set color based on transaction type
+    if (t.type === 'income') {
+      doc.setTextColor(40, 167, 69); // Green for income
+    } else {
+      doc.setTextColor(220, 53, 69); // Red for expense
+    }
+
+    doc.text(`${index + 1}. ${t.date}`, 15, y);
+    doc.text(t.description, 45, y);
+    doc.text(amount, 120, y);
+    doc.text(t.type, 150, y);
+    doc.text(t.mode, 180, y);
+    
+    // Reset text color
+    doc.setTextColor(0, 0, 0);
+    y += 7;
   });
-  y+=10;
-  doc.setFontSize(14);
-  doc.text(`💳 Account Balance (Online): ₹${online.toFixed(2)}`,20,y);
-  y+=10;
-  doc.text(`💵 Purse Balance (Cash): ₹${cash.toFixed(2)}`,20,y);
-  doc.save('Expense_Tracker_Report.pdf');
+
+  // Add summary section
+  y += 10;
+  doc.setFontSize(12);
+  doc.setFont(undefined, 'bold');
+  doc.setTextColor(0, 0, 255);
+  doc.text('Summary', 15, y);
+  y += 7;
+  
+  // Calculate totals
+  let online = 0, cash = 0;
+  tx.forEach(t => {
+    if (t.mode === 'Online') {
+      online += (t.type === 'income' ? t.amount : -t.amount);
+    } else {
+      cash += (t.type === 'income' ? t.amount : -t.amount);
+    }
+  });
+
+  // Add summary details
+  doc.setFont(undefined, 'bold',);
+  doc.text(`Account Balance (Online): ${online.toFixed(2)}`, 20, y);
+  y += 7;
+  doc.text(`Purse Balance (Cash): ${cash.toFixed(2)}`, 20, y);
+  y += 10;
+
+  // Add footer
+  doc.setFontSize(8);
+  doc.setTextColor(100, 100, 100);
+  doc.text('Generated by Expense Tracker App', 105, 285, { align: 'center' });
+
+  // Save the PDF
+  doc.save('Expense_Report.pdf');
 }
 
 // ✅ AUTO LOGIN
@@ -850,8 +1096,63 @@ function toggleMenu() {
   document.getElementById("menu").classList.toggle("show");
 }
 
+function applyFilters() {
+  const fromDate = document.getElementById('filterFrom').value;
+  const toDate = document.getElementById('filterTo').value;
+  const desc = document.getElementById('filterDesc').value.toLowerCase();
+  const type = document.getElementById('filterType').value;
+  const mode = document.getElementById('filterMode').value;
+
+  let tx = getTransactions();
+  
+  // Apply filters
+  tx = tx.filter(t => {
+    const dateMatch = (!fromDate || t.date >= fromDate) && (!toDate || t.date <= toDate);
+    const descMatch = !desc || t.description.toLowerCase().includes(desc);
+    const typeMatch = !type || t.type === type;
+    const modeMatch = !mode || t.mode === mode;
+    
+    return dateMatch && descMatch && typeMatch && modeMatch;
+  });
+
+  renderFilteredTable(tx);
+}
+
+function resetFilters() {
+  document.getElementById('filterFrom').value = '';
+  document.getElementById('filterTo').value = '';
+  document.getElementById('filterDesc').value = '';
+  document.getElementById('filterType').value = '';
+  document.getElementById('filterMode').value = '';
+  renderTable(); // Show all transactions
+}
+
+function renderFilteredTable(filteredTx) {
+  const tbody = document.querySelector('#transactionTable tbody');
+  tbody.innerHTML = '';
+  
+  filteredTx.forEach((t, index) => {
+    tbody.innerHTML += `
+      <tr>
+        <td data-label="Date">${t.date}</td>
+        <td data-label="Description">${t.description}</td>
+        <td data-label="Amount">₹${t.amount.toFixed(2)}</td>
+        <td data-label="Type" style="color:${t.type==='income'?'#28a745':'#dc3545'};">${t.type}</td>
+        <td data-label="Mode">${t.mode}</td>
+        <td data-label="Delete"><button class="delete-btn" onclick="deleteTransaction(${index})">🗑 Delete</button></td>
+      </tr>`;
+  });
+}
+
+ document.addEventListener("DOMContentLoaded", () => {
+  const savedUser = localStorage.getItem('currentUser');
+  if (savedUser) {
+    document.getElementById('usernameDisplay').textContent = `👤 ${savedUser}`;
+  }
+});
 
 </script>
+
     <!-- ✅ Toast Notification -->
 <div id="toast" class="toast">✅ Transaction Added!</div>
 
@@ -861,6 +1162,7 @@ function toggleMenu() {
   <button onclick="scrollToSection('calendar-section')">📅 Calendar</button>
   <button onclick="logout()">🚪 Logout</button>
 </div>
+
 
 
 </body>
